@@ -1,4 +1,4 @@
-BanG! simulator 2.0
+BanG! simulator 2.1
 
 music name = bgm[musicnamecode].ogg
 score name = [musicnamecode]ex.txt
@@ -186,3 +186,7 @@ beta9 - added effect function (Thanks to @FstyleArmy). chart fix bgm054
        - chart downloader is deprecated, use https://qq1010903229.github.io/BanGConverter
        - note movement now based on time instead of tick
        - score calculation now support bandori and arcaea
+2.1 (by loader3229) - performance improvement
+       - nps display
+       - score calculation now support bandori, arcaea and standard
+       - bugfix in chart 359+ (HELL! or HELL? SP)
