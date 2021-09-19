@@ -1,2 +1,2 @@
-# BanG! simulator 2.0
+# BanG! simulator 2.1
 GBP simulator with GM8.1
