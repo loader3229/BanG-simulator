@@ -4,15 +4,10 @@ import sys
 import fileinput
 import re
 import json
-import requests
 
-print("BanG! Simulator Chart Downloader v2.2-beta1")
-print("1: Download official chart")
-print("2: Download official music")
-print("3: Convert your official BMS to BanG! Simulator format")
+print("BanG! Simulator Chart Downloader v2.2-beta1 -- Official BMS Converter")
 print("Known Bugs: Official BMS Converter can't convert 'Nevereverland'(295) and 'Pappare☆Life! Hoo-hooray!'(370).")
-print("For Bestdori! community charts, please use https://qq1010903229.github.io/BanGConverter to download and convert")
-oper = input("Input: ")
+oper = "3"
 quit_temp = 1
 if oper == "2":
   musicnamecode = input("Official music ID (Example: 001, 296, 1001): ")
