@@ -1,4 +1,4 @@
-
+﻿
 import os
 import sys
 import fileinput
@@ -6,16 +6,16 @@ import re
 import json
 import requests
 
-print("BanG! Simulator Chart Downloader v2.2-beta1")
+print("BanG! Simulator Chart Downloader v2.2.1")
 print("1: Download official chart")
 print("2: Download official music")
 print("3: Convert your official BMS to BanG! Simulator format")
-print("Known Bugs: Official BMS Converter can't convert 'Nevereverland'(295) and 'Pappare☆Life! Hoo-hooray!'(370).")
 print("For Bestdori! community charts, please use https://qq1010903229.github.io/BanGConverter to download and convert")
 oper = input("Input: ")
 quit_temp = 1
 if oper == "2":
   musicnamecode = input("Official music ID (Example: 001, 296, 1001): ")
+  red = "Y"
   if os.path.isfile('data/music/bgm'+musicnamecode+'.mp3'):
     red = input("Already have music. re-download? (Y/N)")
   if not (red == "Y" or red == "y"):
@@ -74,6 +74,7 @@ if oper == "1":
     fw = open("data/score/" + musicnamecode + "sp.txt", 'w')
   
   se = {}
+  bpms = {}
   
   print(fr.encoding)
   
@@ -87,17 +88,18 @@ if oper == "1":
 
 if oper == "3":
   bmspath = input("Official BMS file path: ")
+  bmspath = bmspath.replace('"','')
   fr = open(bmspath,'r')
   fw = open(bmspath+"_converted.txt", 'w')
   se = {}
+  bpms = {}
   quit_temp = 0
 
 if quit_temp == 1:
   quit(0)
 
-
+stops = {}
 #header read
-#it should be modified to handle bpm over 256
 while True:
     line = fr.readline()
     #print(line)
@@ -106,7 +108,12 @@ while True:
     if line.find('WAV') != -1:
         se[line[4:6]] = line[7:-1]
     elif line.find('BPM') != -1:
-        bpm = float(line[5:-1])
+        if line[4] == " ":
+         bpm = float(line[5:-1])
+        else:
+         bpms[line[4:6]] = float(line[7:-1])
+    elif line.find('STOP') != -1:
+         stops[line[5:7]] = float(line[8:-1])
     else:
         continue
 print(se)
@@ -124,6 +131,11 @@ note = []   #all the notes will be put here. note has notese, notetype, notebeat
 
 noteindex = 0   #to indicate note number
 errorinbms = 0
+objects = 1
+notes = 0
+hits = 0
+bpmchanges = 0
+stopadd = 0
 while True:
     line = fr.readline()
     if not line: break
@@ -150,6 +162,9 @@ while True:
         isitlongline = True
     # special lane number
     if lanestring == '01': lane = 0
+    if lanestring == '03': lane = 0
+    if lanestring == '08': lane = 0
+    if lanestring == '09': lane = 0
 
     #BGA, layer, poor exception
     if lanestring == '04': continue
@@ -172,6 +187,16 @@ while True:
 
             if lanestring == '03':                          #bpm control
                 note[noteindex]['notese'] = int(line[i:i+2],16)
+                note[noteindex]['notelane'] = 0
+                note[noteindex]['notetype'] = 'special'
+
+            if lanestring == '08':                          #extended bpm control
+                note[noteindex]['notese'] = bpms[line[i:i+2]]
+                note[noteindex]['notelane'] = 0
+                note[noteindex]['notetype'] = 'special'
+
+            if lanestring == '09':                          #extended stop control
+                note[noteindex]['notese'] = stops[line[i:i+2]]
                 note[noteindex]['notelane'] = 0
                 note[noteindex]['notetype'] = 'special'
 
@@ -206,24 +231,31 @@ while True:
                     if sename == 'bd.wav':
                         note[i]['notese'] = secode
                 print(note[i]['notese'])
+                
 
 
         if note[i]['notelane'] == 0:                #handle special type of note
             if lanestring == '03':
                 note[i]['noteproperty'] = 'bpmchange'
                 continue
-            if note[i]['notese'] == '01':
-                note[i]['noteproperty'] = 'bgm'
-            if se[note[i]['notese']] == se['01']: #very special case like music 085
-                note[i]['noteproperty'] = 'bgm'
-            if se[note[i]['notese']] == 'cmd_fever_ready.wav':
-                note[i]['noteproperty'] = 'feverready'
-            if se[note[i]['notese']] == 'cmd_fever_start.wav':
-                note[i]['noteproperty'] = 'feverstart'
-            if se[note[i]['notese']] == 'cmd_fever_end.wav':
-                note[i]['noteproperty'] = 'feverend'
-            if se[note[i]['notese']] == 'cmd_fever_checkpoint.wav':
-                note[i]['noteproperty'] = 'fevercheck'
+            if lanestring == '08':
+                note[i]['noteproperty'] = 'bpmchange'
+                continue
+            if lanestring == '09':
+                note[i]['noteproperty'] = 'stop'
+                continue
+            note[i]['noteproperty'] = 'bgm'
+            if note[i]['notese'] in se:
+             if note[i]['notese'] == '01':
+                 note[i]['noteproperty'] = 'bgm'
+             if se[note[i]['notese']] == 'cmd_fever_ready.wav':
+                 note[i]['noteproperty'] = 'feverready'
+             if se[note[i]['notese']] == 'cmd_fever_start.wav':
+                 note[i]['noteproperty'] = 'feverstart'
+             if se[note[i]['notese']] == 'cmd_fever_end.wav':
+                 note[i]['noteproperty'] = 'feverend'
+             if se[note[i]['notese']] == 'cmd_fever_checkpoint.wav':
+                 note[i]['noteproperty'] = 'fevercheck'
 
 
 
@@ -340,6 +372,18 @@ while True:
             if se[note[i]['notese']] == 'directional_fl_r.wav':
                 note[i]['noteproperty'] = 'none'
                 note[i]['notetype'] = 'directional_fl_r'
+            if se[note[i]['notese']] == 'slide_a_skill.wav':
+                note[i]['noteproperty'] = 'skill'
+                note[i]['notetype'] = 'slidea'
+            if se[note[i]['notese']] == 'slide_b_skill.wav':
+                note[i]['noteproperty'] = 'skill'
+                note[i]['notetype'] = 'slideb'
+            if se[note[i]['notese']] == 'slide_a_end_skill.wav':
+                note[i]['noteproperty'] = 'skill'
+                note[i]['notetype'] = 'slideaend'
+            if se[note[i]['notese']] == 'slide_b_end_skill.wav':
+                note[i]['noteproperty'] = 'skill'
+                note[i]['notetype'] = 'slidebend'
 
         print(note[i])
 
@@ -363,8 +407,10 @@ savedtiming = 0
 savedbeat = 0
 dfllt=-1
 dflrt=-1
+stopt=-1
 dfll=[0,0,0,0,0,0,0,0]
 dflr=[0,0,0,0,0,0,0,0]
+stopaddt=0
 for i in range(len(sortednote)):
     sortednote[i]['notebeat'] *= 4
     print(sortednote[i])
@@ -377,45 +423,64 @@ for i in range(len(sortednote)):
     print(sortednote[i])
 
 if True:    #convert to my simulator
-    fw.write('46\n'+str(bpm))
+    fw.write('46\n'+str(bpm)+'\n0/0/0')
     
     for i in range(len(sortednote)):
         if dfllt != -1 and dfllt < sortednote[i]['notebeat']:
             print('dfll:', dfll);
-            dfllts = str(dfllt)
+            dfllts = str(dfllt + stopadd/48)
             width = 0
             for k in range(1,8):
                 if dfll[k]:
                     width = width + 1
                 elif width:
                     fw.write('\n'+ dfllts + '/' + str(50+width) + '/' + str(k-1))
+                    objects = objects + 1
+                    notes = notes + 1
+                    hits = hits + 1
                     width = 0
                 dfll[k]=0
             if width:
                 fw.write('\n'+ dfllts + '/' + str(50+width) + '/7')
+                objects = objects + 1
+                notes = notes + 1
+                hits = hits + 1
                 width = 0
             dfllt = -1
         if dflrt != -1 and dflrt < sortednote[i]['notebeat']:
             print('dflr:', dflr);
-            dflrts = str(dflrt)
+            dflrts = str(dflrt + stopadd/48)
             width = 0
             for k in range(1,8):
                 if dflr[k]:
                     width = width + 1
                 elif width:
                     fw.write('\n'+ dflrts + '/' + str(60+width) + '/' + str(k-width))
+                    objects = objects + 1
+                    notes = notes + 1
+                    hits = hits + 1
                     width = 0
                 dflr[k]=0
             if width:
                 fw.write('\n'+ dflrts + '/' + str(60+width) + '/' + str(8-width))
+                objects = objects + 1
+                notes = notes + 1
+                hits = hits + 1
                 width = 0
             dflrt = -1
-        b = str(sortednote[i]['notebeat'])
-        if sortednote[i]['noteproperty'] == 'bgm':
-            fw.write('\n0/0/0')
-            continue
+        if stopt != -1 and stopt < sortednote[i]['notebeat']:
+            print('stopaddt:', stopaddt);
+            stopadd = stopadd + stopaddt
+            stopaddt = 0
+            stopt = -1
+        b = str(sortednote[i]['notebeat'] + stopadd/48)
         if sortednote[i]['noteproperty'] == 'bpmchange':
             fw.write('\n'+ b + '/20/' + str(sortednote[i]['notese']))
+            bpmchanges = bpmchanges + 1
+            continue
+        if sortednote[i]['noteproperty'] == 'stop':
+            stopt = sortednote[i]['notebeat']
+            stopaddt = stopaddt + sortednote[i]['notese']
             continue
         if sortednote[i]['notelane'] == 0:
             continue
@@ -424,32 +489,54 @@ if True:    #convert to my simulator
             t = '/1/'
             if sortednote[i]['noteproperty'] == 'skill':
              t = '/11/'
+            notes = notes + 1
+            hits = hits + 1
         if sortednote[i]['notetype'] == 'flick':
             t = '/2/'
+            notes = notes + 1
+            hits = hits + 1
         if sortednote[i]['notetype'] == 'longstart':
             t = '/21/'
             if sortednote[i]['noteproperty'] == 'skill':
              t = '/31/'
+            notes = notes + 1
+            hits = hits + 1
         if sortednote[i]['notetype'] == 'longend':
             t = '/25/'
             if sortednote[i]['noteproperty'] == 'skill':
              t = '/32/'
+            notes = notes + 1
         if sortednote[i]['notetype'] == 'longflick':
             t = '/26/'
+            notes = notes + 1
         if sortednote[i]['notetype'] == 'slidea':
             t = '/4/'
+            if sortednote[i]['noteproperty'] == 'skill':
+             t = '/33/'
+            notes = notes + 1
         if sortednote[i]['notetype'] == 'slideaend':
             t = '/5/'
+            if sortednote[i]['noteproperty'] == 'skill':
+             t = '/34/'
+            notes = notes + 1
         if sortednote[i]['notetype'] == 'slideaendflick':
             t = '/12/'
+            notes = notes + 1
         if sortednote[i]['notetype'] == 'slideahidden':
             t = '/41/'
         if sortednote[i]['notetype'] == 'slideb':
             t = '/7/'
+            if sortednote[i]['noteproperty'] == 'skill':
+             t = '/35/'
+            notes = notes + 1
         if sortednote[i]['notetype'] == 'slidebend':
             t = '/8/'
+            if sortednote[i]['noteproperty'] == 'skill':
+             t = '/36/'
+            notes = notes + 1
         if sortednote[i]['notetype'] == 'slidebendflick':
             t = '/13/'
+            notes = notes + 1
         if sortednote[i]['notetype'] == 'slidebhidden':
             t = '/42/'
         if sortednote[i]['notetype'] == 'directional_fl_l':
@@ -463,34 +550,47 @@ if True:    #convert to my simulator
             print('dflr:', dflr);
             continue
         fw.write('\n' + b + t + str(sortednote[i]['notelane']))
+        objects = objects + 1
     if dfllt != -1:
         print('dfll:', dfll);
-        dfllts = str(dfllt)
+        dfllts = str(dfllt + stopadd/48)
         width = 0
         for k in range(1,8):
             if dfll[k]:
                 width = width + 1
             elif width:
                 fw.write('\n'+ dfllts + '/' + str(50+width) + '/' + str(k-1))
+                objects = objects + 1
+                notes = notes + 1
+                hits = hits + 1
                 width = 0
             dfll[k]=0
         if width:
             fw.write('\n'+ dfllts + '/' + str(50+width) + '/7')
+            objects = objects + 1
+            notes = notes + 1
+            hits = hits + 1
             width = 0
         dfllt = -1
     if dflrt != -1:
         print('dflr:', dflr);
-        dflrts = str(dflrt)
+        dflrts = str(dflrt + stopadd/48)
         width = 0
         for k in range(1,8):
             if dflr[k]:
                 width = width + 1
             elif width:
                 fw.write('\n'+ dflrts + '/' + str(60+width) + '/' + str(k-width))
+                objects = objects + 1
+                notes = notes + 1
+                hits = hits + 1
                 width = 0
             dflr[k]=0
         if width:
             fw.write('\n'+ dflrts + '/' + str(60+width) + '/' + str(8-width))
+            objects = objects + 1
+            notes = notes + 1
+            hits = hits + 1
             width = 0
         dflrt = -1
 
@@ -500,3 +600,13 @@ fw.close()
 
 if errorinbms == 1:
     print("error in bms")
+
+print("---------------------------------")
+if oper == "3":
+ print("Convert successfully completed!")
+else:
+ print("Download successfully completed!")
+print("Objects:",objects)
+print("Notes:",notes)
+print("BPM Changes:",bpmchanges)
+input("Press enter to exit...")
