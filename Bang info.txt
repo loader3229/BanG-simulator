@@ -1,4 +1,4 @@
-BanG! simulator 2.2
+BanG! simulator 2.3
 
 music name = bgm[musicnamecode].ogg / bgm[musicnamecode].mp3
 score name = [musicnamecode]ex.txt
@@ -19,13 +19,7 @@ stop record S
 effect image can be downloaded https://www.dropbox.com/s/r4txv83xdxar3xs/effect.zip?dl=0
 image by @FstyleArmy
 
-in effect folder, there are 3 folders normal, flick and slide
-put png files here and write center position in setting.ini
-since images are should be in ram, too large or too many images can cause crash
-this is for performance. if you need, please contact me.
-
-
-[score explaining]
+[Chart Format]
 
 beat/notetype/lanenumber
 
@@ -60,7 +54,7 @@ new note types in version 1.30
 35 slide b start with skill
 36 slide b end with skill
 
-new note types in version 2.00
+new note types in version 2.0
 41 slide a among hidden
 42 slide b among hidden
 51 directional flick left width 1
@@ -78,6 +72,17 @@ new note types in version 2.00
 66 directional flick right width 6
 67 directional flick right width 7
 
+new note types in version 2.3
+71 universal slide start
+72 universal slide among
+73 universal slide end
+74 universal slide end flick
+75 universal slide start skill
+76 universal slide end skill
+77 universal slide among hidden
+To use notetype 71-77, please use format beat/notetype/id/lanenumber, id is slide ID
+ex) 8/71/2/1	<- slide ID 2 start at beat 8 on 1st lane
+ex) 9/73/3/4	<- slide ID 3 end at beat 9 on 4th lane
 
 1.offset
 2.bpm
@@ -102,31 +107,32 @@ setting.ini explaining
 
 [Coord]
 Topx=622		<- top x value
-Topdistance=6		<- distance between lanes
+Topdistance=6		<- top distance between lanes
 Topy=20			<- top y value
-Botx=197		
-Botdistance=147
-Boty=589
+Botx=197		<- bottom x value
+Botdistance=147		<- bottom distance between lanes
+Boty=589		<- bottom y value
 [Display]
 Windowx=1280		<- window width (please always set to 1280)
 Windowy=720		<- window height (please always set to 720)
-Notesize=72		<- size of note %
-Notespeed=6		<- note speed
+Notesize=71		<- (2.3 update) note size (71 = 100%, 142 = 200%)
+Notespeed=6		<- (2.3 update) note speed (not the GBP note speed, please go to bottom to find the corresponding note speed)
 FPS=60			<- frequency of your monitor. usually 60hz 
 [Music]
 Sevol=40		<- sound effect volume
 Musicvol=100		<- music volume
 Offset=46		<- music offset
 [Settings]
-Color=1			<- (1.30 update) color change when note is not multiplied by GrayNoteMultiplier
-GrayNoteMultiplier=2    <- (1.30 update)
+Color=1			<- (2.3 update) color change when note is not fit by 1/GrayNoteMultiplier beat line
+GrayNoteMultiplier=2    <- (2.3 update) 
 Sameline=1		<- if two notes are in same timing, make a line (not support old longnote 9)
 ScoreCalculateType=0	<- (2.0 update) 0 for bandori-standard, 1 for arcaea, 2 for standard, 3 for bandori-new
 ShowHidden=0		<- (2.2 update) show hidden slide among
-Font=3			<- (2.2 update) 0 for MS Gothic, 3 for CN Server Font
+Font=5			<- (2.3 update) 0 for MS Gothic, 3 for CN Server Font, 5 for Arial
+ScoreFont=3		<- (2.3 update) 0 for MS Gothic, 1 for JP/EN Server Font, 3 for CN Server Font, 5 for Arial. When using JP/EN server font, maximum score display digits is 8, otherwise is 10.
 [Effect]		<- effect config
 EffectEnable=1		<- if 0, no effect. if 1, enable image based effect
-Size=0.72		<- effect image size multiplier
+Size=0.71		<- effect image size multiplier
 Normalx=300		<- center position of x in normal effect image
 Normaly=589		<- y
 Flickx=300		<- flick x
@@ -149,63 +155,73 @@ default scoreoffset is 46 and ini offset is 46 (previous was 50)
 
 
 
+2.x Changelog by loader3229/qq1010903229
+
+2.0 - New Note Types in GBP Version 5.0 Support
+    - Note movement now based on time instead of tick, so the lag is reduced
+    - Added Score Display (Types: Bandori-Standard, Arcaea)
+    - The simulator now uses CN Server Font
+
+2.1 - Performance Improvement
+    - Added NPS Display
+    - New Score Calculation Type: Standard
+    - Fix a bug in chart 359+ (HELL! or HELL? SP)
+
+2.2 - BanG! Simulator 3rd Anniversary! New opening page added!
+    - Added Time, Progress Bar and Score Bar Display
+    - Added Maximum and Average NPS Display
+    - New Score Calculation Type: Bandori-New
+    - Hidden slide among showing
+    - Moving arrow added on directional notes
+    - Added Font Change
+    - Increased maximum score display digits to 10
+    - New Chart Downloader!
+    - Fixed some bugs
+
+2.3 - Added Universal Slides! Now you can use more than 2 slides at the same time!
+    - Decimal note lanes (0.0-8.0) support! (Any note type except directional)
+    - The opening page now display options
+    - The opening page now display Equivalent GBP Note Speed/Size
+    - Note Speed range is now 0.0-1000.0 (Equivalent GBP Note Speed range (Estimation) 1.0-12.1)
+    - More Font Changes
+    - Fixed some bugs (such as directional note effect volume is not affected by effect volume options)
 
 
-
-change log
-
-beta - first release
-beta2 - changed note movement
-beta3 - fixed slide note connection movement
-beta4 - optimization and fixed slide bug (sudden moving in end line)
-beta5 - bugs fixed, chart downloader and chart converter program added
-	new type of longnote added
-beta6 - apply new audio method. now support mp3 files and sync improvement
-	added to setting: FPS, Color, Sameline
-	background file can be edited
-	can change FPS
-beta7 - moving arrow added on flick note
-	every note depth is lower than slide
-	gray color note support (if beat can not be divided by 0.5, become gray)
-	press space to start the song. now you can move window before music starts
-	when two notes are in same timing, make a line.(notes should be sequentially ordered)
-beta7a-	music offset adjust
-	line is now under the note sprite
-beta7b- chart convertor support more types
-	now support resolution change
-beta8 - special score support
-	now incorrect bms files can be converted since offical one is incorrect
-	changed database domain to bandori.ga
-beta8a- bangdream api update
-	video record function (for frame perfect video)(not finished)
-beta8c- video record function
-	font changed
-beta8d- chart fix like bgm153 (chartdownloader update)
-beta9 - added effect function (Thanks to @FstyleArmy). chart fix bgm054
-
-1.01 - bgm177 musicscore fixed (added exceptions)
-1.1 - bestdori custom chart support
-1.11 - full automated video recording
-
-1.20 (by loader3229) - score display, gray color note support rewrite and CN server font
-1.30 (by loader3229) - new note types (chart downloader is not updated)
-2.0 (by loader3229) - new note types in JP server version 5.0 support
-       - chart downloader is deprecated, use https://qq1010903229.github.io/BanGConverter
-       - note movement now based on time instead of tick
-       - new score calculation type: arcaea
-2.1 (by loader3229) - performance improvement
-       - nps display
-       - new score calculation type: standard
-       - bugfix in chart 359+ (HELL! or HELL? SP)
-2.2 (by loader3229) - BanG! Simulator 3rd Anniversary! New opening page added!
-       - time and progress display
-       - score bar display
-       - max and avg nps display
-       - new score calculation type: bandori-new
-       - hidden slide among showing
-       - moving arrow added on directional note
-       - font change
-       - increase maximum displayed score to 9999999999
-       - chart downloader is updated, now it isn't deprecated
-       - changed database to bestdori
-       - some bugfix
+BanGSim 2.3+ Note Speed   GBP Note Speed (Estimation)
+0                         1.0
+0.01                      1.6
+0.02                      2.1
+0.05                      3.2
+0.1                       4.3
+0.2                       5.5
+0.5                       6.9
+1                         7.9
+2                         8.7
+3                         9.1
+4                         9.4
+5                         9.6
+6                         9.7
+7                         9.8
+8                         9.9
+9                         10.0
+11                        10.1
+13                        10.2
+16                        10.3
+19                        10.4
+23                        10.5
+28                        10.6
+35                        10.7
+45                        10.8
+60                        10.9
+80                        11.0
+100                       11.1
+125                       11.2
+150                       11.3
+200                       11.4
+250                       11.5
+300                       11.6
+400                       11.7
+500                       11.8
+600                       11.9
+800                       12.0
+1000                      12.1
