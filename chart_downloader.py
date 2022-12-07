@@ -6,7 +6,7 @@ import re
 import json
 import requests
 
-print("BanG! Simulator Chart Downloader v2.2.1")
+print("BanG! Simulator Chart Downloader v2.4")
 print("1: Download official chart")
 print("2: Download official music")
 print("3: Convert your official BMS to BanG! Simulator format")
@@ -28,12 +28,30 @@ if oper == "2":
 
 if oper == "1":
   musicnamecode = input("Official chart ID (Example: 001, 296+, 1001): ")
-  if musicnamecode.find('+') != -1:
+  if musicnamecode.find('-') != -1:
+    isspecialchart = 2
+    musicnamecode = musicnamecode[0:3]
+  elif musicnamecode.find('+') != -1:
     isspecialchart = 1
     musicnamecode = musicnamecode[0:3]
   else:
     isspecialchart = 0
-  if isspecialchart == 1: #check if request special
+  if isspecialchart == 2: #check if request hard
+    if not os.path.isfile('scorebms/' + musicnamecode + 'hd.txt'):
+        print('download bms from bestdori')
+        req = requests.get('https://bestdori.com/api/songs/'+str(int(musicnamecode))+'.json')
+        data = req.json()
+        musicnamestring = data["bgmFile"]
+        server = 'en' if int(musicnamecode) >= 1000 else 'jp'
+        req = requests.get('https://bestdori.com/assets/'+server+'/musicscore/musicscore'+str(((int(musicnamecode)+9)//10)*10)+ '_rip/' + musicnamestring + '_hard.txt')
+        print(req.url)
+        html = req.text
+        f1 = open('scorebms/' + musicnamecode + 'hd.txt', 'w')
+        f1.write(html)
+        f1.close()
+    else:
+        print("already have music score")
+  elif isspecialchart == 1: #check if request special
     if not os.path.isfile('scorebms/' + musicnamecode + 'sp.txt'):
         print('download bms from bestdori')
         req = requests.get('https://bestdori.com/api/songs/'+str(int(musicnamecode))+'.json')
@@ -69,6 +87,9 @@ if oper == "1":
   if isspecialchart == 0:
     fr = open("scorebms/"+musicnamecode+'ex.txt','r')
     fw = open("data/score/" + musicnamecode + "ex.txt", 'w')
+  elif isspecialchart == 2:
+    fr = open("scorebms/"+musicnamecode+'hd.txt','r')
+    fw = open("data/score/" + musicnamecode + "hd.txt", 'w')
   else:
     fr = open("scorebms/"+musicnamecode+'sp.txt','r')
     fw = open("data/score/" + musicnamecode + "sp.txt", 'w')
@@ -82,6 +103,8 @@ if oper == "1":
     fr.close()
     if isspecialchart == 0:
         fr = open("scorebms/"+musicnamecode+'ex.txt','r', encoding='UTF8')
+    elif isspecialchart == 2:
+        fr = open("scorebms/"+musicnamecode+'hd.txt','r', encoding='UTF8')
     else:
         fr = open("scorebms/"+musicnamecode+'sp.txt','r', encoding='UTF8')
   quit_temp = 0
@@ -122,7 +145,7 @@ print('start bpm:' + str(bpm))
 
 #main read
 longstarted = []            #to indicate there was longnotestart before a line
-for i in range(0,8):
+for i in range(0,9):
     longstarted.append(False)
 
 note = []   #all the notes will be put here. note has notese, notetype, notebeat, notelane, noteproperty, notetiming
@@ -155,10 +178,15 @@ while True:
     if lanestring[1] == '4': lane = 5
     if lanestring[1] == '5': lane = 6
     if lanestring[1] == '8': lane = 7
+    if lanestring[1] == '9': lane = 8
+    if lanestring == '21': lane = -1
+    if lanestring == '61': lane = -1
     #select long note line
     #if lanestring[0] == '1':
     isitlongline = False
     if lanestring[0] == '5':
+        isitlongline = True
+    if lanestring[0] == '6':
         isitlongline = True
     # special lane number
     if lanestring == '01': lane = 0
@@ -170,6 +198,7 @@ while True:
     if lanestring == '04': continue
     if lanestring == '06': continue
     if lanestring == '07': continue
+    if lanestring == 'SC': continue
 
 
     #read a line
@@ -260,6 +289,7 @@ while True:
 
 
         elif note[i]['notetype'] == 'long':     #long
+            if note[i]['notelane'] == -1: lane = 0
             if longstarted[lane] == False:          #if this is long note start
                 note[i]['notetype'] = 'longstart'
                 longstarted[lane] = True
@@ -288,6 +318,7 @@ while True:
                     note[i]['notetype'] = 'longflick'
 
         elif note[i]['notetype'] == 'hidden':     #hidden
+                if note[i]['notelane'] == -1: lane = 0
                 if se[note[i]['notese']] == 'slide_a.wav':
                     note[i]['noteproperty'] = 'none'
                     note[i]['notetype'] = 'slideahidden'
@@ -312,6 +343,7 @@ while True:
                     note[i]['notetype'] = 'slidebhidden'
 
         else:                                   #normal, flick, slide
+            if note[i]['notelane'] == -1: lane = 0
             if se[note[i]['notese']] == 'bd.wav':
                 note[i]['noteproperty'] = 'none'
                 note[i]['notetype'] = 'normal'
@@ -485,6 +517,8 @@ if True:    #convert to my simulator
         if sortednote[i]['notelane'] == 0:
             continue
 
+        if sortednote[i]['notelane'] == -1:
+            sortednote[i]['notelane'] = 0
         if sortednote[i]['notetype'] == 'normal':
             t = '/1/'
             if sortednote[i]['noteproperty'] == 'skill':

@@ -179,7 +179,7 @@ default scoreoffset is 46 and ini offset is 46 (previous was 50)
     - Fixed some bugs
 
 2.3 - Added Universal Slides! Now you can use more than 2 slides at the same time!
-    - Decimal note lanes (0.0-8.0) support! (Any note type except directional)
+    - Non-Integer note lanes (0.0-8.0) support! (Any note type except directional)
     - The opening page now display options
     - The opening page now display Equivalent GBP Note Speed/Size
     - Note Speed range is now 0.0-1000.0 (Equivalent GBP Note Speed range (Estimation) 1.0-12.1)
