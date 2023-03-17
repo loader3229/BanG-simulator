@@ -1,4 +1,4 @@
-BanG! simulator 2.3
+BanG! simulator 2.5
 
 music name = bgm[musicnamecode].ogg / bgm[musicnamecode].mp3
 score name = [musicnamecode]ex.txt
@@ -122,14 +122,20 @@ FPS=60			<- frequency of your monitor. usually 60hz
 Sevol=40		<- sound effect volume
 Musicvol=100		<- music volume
 Offset=46		<- music offset
+SEOffset=0		<- sound effect offset
 [Settings]
 Color=1			<- (2.3 update) color change when note is not fit by 1/GrayNoteMultiplier beat line
 GrayNoteMultiplier=2    <- (2.3 update) 
 Sameline=1		<- if two notes are in same timing, make a line (not support old longnote 9)
+Mirror=0		<- (2.4 update) mirror the chart
 ScoreCalculateType=0	<- (2.0 update) 0 for bandori-standard, 1 for arcaea, 2 for standard, 3 for bandori-new
 ShowHidden=0		<- (2.2 update) show hidden slide among
 Font=5			<- (2.3 update) 0 for MS Gothic, 3 for CN Server Font, 5 for Arial
-ScoreFont=3		<- (2.3 update) 0 for MS Gothic, 1 for JP/EN Server Font, 3 for CN Server Font, 5 for Arial. When using JP/EN server font, maximum score display digits is 8, otherwise is 10.
+ScoreFont=3		<- (2.3 update) 0 for MS Gothic, 1 for JP/EN Server Font, 3 for CN Server Font, 5 for Arial. When using JP/EN server font, maximum score display digits is 8, otherwise is 11.
+ScoreDisplay=0		<- (2.4 update) if 1, The displayed score will have 2 decimal digits.
+MV=0			<- (2.4 update) if 1, Enable Image-Based MV Mode.
+PlayLine=0		<- (2.4 update) if 0, no playline will be displayed, otherwise data\playline\[ID].png will be displayed. Recommanded: 0 for normal mode, 1 for MV mode.
+MVAlpha=0.3		<- (2.4 update) set the alpha of the MV. (0.0-1.0)
 [Effect]		<- effect config
 EffectEnable=1		<- if 0, no effect. if 1, enable image based effect
 Size=0.71		<- effect image size multiplier
@@ -146,8 +152,20 @@ Amongy=589		<- does not use for now
 Type=0                  <- (2.2 update) if 0, use floating-point calculation. if 1, use integer calculation as BanG Dream! GBP APP does.
 Power=250000            <- (2.2 update) the power of your band
 Difficulty=29           <- (2.2 update) the difficulty of the chart
-SkillTime=7             <- (2.2 update) the time of each skill, in seconds
-SkillEffect=100         <- (2.2 update) the Score UP effect of each skill, in percent.
+SkillType=0             <- (2.4 update) if 0, skill notes use the same skill. if 1, first 5 skill notes will use the 1st-5th skills. 2 is averaged mode.
+SkillTime=7             <- (2.2 update) the time of each skill (encore skill if SkillType is not 0), in seconds
+SkillEffect=100         <- (2.2 update) the Score UP effect of each skill (encore skill if SkillType is not 0), in percent.
+SkillTime1=7            <- (2.4 update) the time of the 1st skill, in seconds
+SkillEffect1=100        <- (2.4 update) the Score UP effect of the 1st skill, in percent.
+SkillTime2=7            <- (2.4 update) the time of the 2nd skill, in seconds
+SkillEffect2=100        <- (2.4 update) the Score UP effect of the 2nd skill, in percent.
+SkillTime3=7            <- (2.4 update) the time of the 3rd skill, in seconds
+SkillEffect3=100        <- (2.4 update) the Score UP effect of the 3rd skill, in percent.
+SkillTime4=7            <- (2.4 update) the time of the 4th skill, in seconds
+SkillEffect4=100        <- (2.4 update) the Score UP effect of the 4th skill, in percent.
+SkillTime5=7            <- (2.4 update) the time of the 5th skill, in seconds
+SkillEffect5=100        <- (2.4 update) the Score UP effect of the 5th skill, in percent.
+
 
 normal, gray, flick, slide, skill note sprite from https://github.com/BandoriDatabase/bangdream-data-viewer
 directional note sprite from bestdori
@@ -186,6 +204,15 @@ default scoreoffset is 46 and ini offset is 46 (previous was 50)
     - More Font Changes
     - Fixed some bugs (such as directional note effect volume is not affected by effect volume options)
 
+2.4 - BanG! Simulator 4th Anniversary!
+    - Image-Based MV Mode Is Added! Now you can use MV in the simulator. Read mv\readme.txt for more details.
+    - Added Mirror
+    - More Score Display Options
+    - Note Speed range is now 0.0-10000.0 (Equivalent GBP Note Speed range (Estimation) 1.0-13.0)
+    - Fixed some bugs
+
+2.5.0 - Added SE Offset Setting, MV Offset Setting and MV Playing Mode (for testing MV Configuration, or for anyone who likes just watching MV). Read mv\readme.txt for more details.
+    - Fixed some bugs
 
 BanGSim 2.3+ Note Speed   GBP Note Speed (Estimation)
 0                         1.0
@@ -225,3 +252,9 @@ BanGSim 2.3+ Note Speed   GBP Note Speed (Estimation)
 600                       11.9
 800                       12.0
 1000                      12.1
+1300                      12.2
+1600                      12.3
+2000                      12.4
+2500                      12.5
+5000                      12.8
+10000                     13.0
