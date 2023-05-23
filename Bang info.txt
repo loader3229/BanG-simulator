@@ -1,4 +1,4 @@
-BanG! simulator 2.5
+BanG! simulator 2.6
 
 music name = bgm[musicnamecode].ogg / bgm[musicnamecode].mp3
 score name = [musicnamecode]ex.txt
@@ -80,9 +80,20 @@ new note types in version 2.3
 75 universal slide start skill
 76 universal slide end skill
 77 universal slide among hidden
-To use notetype 71-77, please use format beat/notetype/id/lanenumber, id is slide ID
+To use notetype 71-77/103-107, please use format beat/notetype/id/lanenumber, id is slide ID
 ex) 8/71/2/1	<- slide ID 2 start at beat 8 on 1st lane
 ex) 9/73/3/4	<- slide ID 3 end at beat 9 on 4th lane
+
+new note types in version 2.6
+100 timing group start (ex. 0/100)
+101 timing group normal
+102 timing group flick
+103 timing group universal slide start
+104 timing group universal slide among
+105 timing group universal slide end
+106 timing group universal slide end flick
+107 timing group universal slide among hidden
+110 timing group scrolling speed change
 
 1.offset
 2.bpm
@@ -212,6 +223,10 @@ default scoreoffset is 46 and ini offset is 46 (previous was 50)
     - Fixed some bugs
 
 2.5.0 - Added SE Offset Setting, MV Offset Setting and MV Playing Mode (for testing MV Configuration, or for anyone who likes just watching MV). Read mv\readme.txt for more details.
+    - Fixed some bugs
+
+2.6.0 - BanG! Simulator 4.5th Anniversary!
+    - Added Timing Groups
     - Fixed some bugs
 
 BanGSim 2.3+ Note Speed   GBP Note Speed (Estimation)
